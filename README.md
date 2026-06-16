@@ -23,24 +23,13 @@ Argentine jurisdictions, with two quota regimes (30% and 50%).
 ```
 
 ## Data
-The analysis uses three data sources. Place all data files in a `data/` folder in the repository root before running.
-
-### Included in this repository / data archive
-- `women_representation.xlsx` — hand-collected provincial women's representation 
-  panel, 1987–2025 (sources documented in thesis Section 3.3)
-- `LowQuota_adopt_impl.xlsx`, `HighQuota_adopt_implement.xlsx` — quota adoption 
-  and implementation dates
-- `Base de datos_WomensRepresentation.xls` — Granara (2014) cross-validation data
-
-### EPH and Ministry of Labour microdata
-The EPH household microdata (1996–2025) and Ministry of Labour aggregate data are 
-provided in the data archive at https://doi.org/10.5281/zenodo.20712961.
+The data are provided in the data archive at https://doi.org/10.5281/zenodo.20712961.
 Source: INDEC, www.indec.gob.ar
 
 ## How to run
-1. Clone or download this repository.
+1. Download this repository.
 2. Download the data archive and place all files in a `data/` folder in the repository root.
-3. Open `MA_QuotaModel.R`, set the working directory to the repository root, and run the script top to bottom. Section comments mark the stages.
+3. Open `MA_QuotaModel.R`, set the working directory to the repository root, and run the script. 
 
 ## Contact
 reka.bator@s.wu.ac.at
