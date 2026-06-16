@@ -13,8 +13,8 @@ Argentine political jurisdictions, with two quota regimes (30% and 50%).
 - R (version used: 4.6.0)
   
 ## Data
-The data are provided in the data archive at https://doi.org/10.5281/zenodo.20712961.
-Source: INDEC, www.indec.gob.ar
+The data are provided in the data archive at [https://doi.org/10.5281/zenodo.20715643](https://doi.org/10.5281/zenodo.20715643).
+Source: INDEC, [www.indec.gob.ar](https://www.indec.gob.ar)
 
 ## How to run
 1. Download this repository.
