@@ -22,7 +22,7 @@ library(bacondecomp)
 #download and unzip the data automatically
 if (!dir.exists("quota_data")) {
   download.file(
-    "https://doi.org/10.5281/zenodo.20715643/files/quota_data.zip",
+    "https://zenodo.org/records/20715643/files/quota_data.zip?download=1",
     destfile = "quota_data.zip"
   )
   unzip("quota_data.zip")
