@@ -1,3 +1,7 @@
+  install.packages(c("haven","dplyr","tidyr","ggplot2","readr","stringr",
+                     "purrr","readxl","foreign","did","ivreg","lmtest",
+                     "sandwich","fixest","bacondecomp"))
+
 #packages
 library(haven)
 library(dplyr)
