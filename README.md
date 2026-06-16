@@ -5,9 +5,9 @@ Token Woman or Superwoman? Effects of Parliamentary Gender Quotas in Argentine P
 MSc Economics, WU Vienna · Supervisor: Dr. Simon Heß
 
 ## Overview
-This repository contains the R code to replicate all results in the thesis, which 
-uses a staggered two-way fixed-effects difference-in-differences design across 24 
-Argentine political jurisdictions, with two quota regimes (30% and 50%).
+This repository contains the R code to replicate all results in the thesis, which uses a 
+staggered two-way fixed-effects difference-in-differences design across 24 Argentine political jurisdictions, 
+with two quota regimes (30% and 50%).
 
 ## Software requirements
 - R (version used: 4.6.0)
@@ -17,9 +17,7 @@ The data are provided in the data archive at [https://doi.org/10.5281/zenodo.207
 Source: INDEC, [www.indec.gob.ar](https://www.indec.gob.ar)
 
 ## How to run
-1. Download this repository.
-2. Download the data archive and place all files in a `data/` folder in the repository root.
-3. Open `MA_QuotaModel.R`, set the working directory to the repository root, and run the script. 
-
+The script is self-contained. Open `MA_QuotaModel.R` in RStudio and run it. On the first run, it automatically installs any missing packages and downloads the data archive from Zenodo, unzipping it into a `quota_data/` folder.
+   
 ## Contact
 reka.bator@s.wu.ac.at
