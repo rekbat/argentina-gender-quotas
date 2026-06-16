@@ -7,7 +7,7 @@ MSc Economics, WU Vienna · Supervisor: Dr. Simon Heß
 ## Overview
 This repository contains the R code to replicate all results in the thesis, which 
 uses a staggered two-way fixed-effects difference-in-differences design across 24 
-Argentine jurisdictions, with two quota regimes (30% and 50%).
+Argentine political jurisdictions, with two quota regimes (30% and 50%).
 
 ## Software requirements
 - R (version used: 4.6.0)
