@@ -11,17 +11,7 @@ Argentine political jurisdictions, with two quota regimes (30% and 50%).
 
 ## Software requirements
 - R (version used: 4.6.0)
-- Required packages:
-  haven, dplyr, tidyr, ggplot2, readr, stringr, purrr, readxl, foreign,
-  did, ivreg, lmtest, sandwich, fixest, bacondecomp
-
-  Install with:
-```r
-  install.packages(c("haven","dplyr","tidyr","ggplot2","readr","stringr",
-                     "purrr","readxl","foreign","did","ivreg","lmtest",
-                     "sandwich","fixest","bacondecomp"))
-```
-
+  
 ## Data
 The data are provided in the data archive at https://doi.org/10.5281/zenodo.20712961.
 Source: INDEC, www.indec.gob.ar
