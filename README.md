@@ -42,8 +42,5 @@ provided in the data archive at [ZENODO DOI — add once created].
 2. Download the data archive and place all files in a `data/` folder in the repository root.
 3. Open `MA_QuotaModel.R`, set the working directory to the repository root, and run the script top to bottom. Section comments mark the stages.
 
-## Citation
-**Source: INDEC, www.indec.gob.ar**
-
 ## Contact
 reka.bator@s.wu.ac.at
