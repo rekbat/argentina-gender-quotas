@@ -35,7 +35,7 @@ The analysis uses three data sources. Place all data files in a `data/` folder i
 ### EPH and Ministry of Labour microdata
 The EPH household microdata (1996–2025) and Ministry of Labour aggregate data are 
 provided in the data archive at 10.5281/zenodo.20712961.
-**Source: INDEC, www.indec.gob.ar**
+Source: INDEC, www.indec.gob.ar
 
 ## How to run
 1. Clone or download this repository.
