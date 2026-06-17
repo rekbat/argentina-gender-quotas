@@ -1,8 +1,7 @@
 # replication materials
 
 Token Woman or Superwoman? Effects of Parliamentary Gender Quotas in Argentine Provinces on Women's Labour Market Outcomes
-
-MSc Economics, WU Vienna · Supervisor: Dr. Simon Heß
+(MSc Economics, WU Vienna)
 
 ## Overview
 This repository contains the R code to replicate all results in the thesis, which uses a staggered two-way fixed-effects difference-in-differences design across 24 Argentine political jurisdictions, with two quota regimes (30% and 50%).
