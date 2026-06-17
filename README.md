@@ -13,7 +13,7 @@ This repository contains the R code to replicate all results in the thesis, whic
 - The packages used are: haven, dplyr, tidyr, ggplot2, readr, stringr, purrr, readxl, foreign, did, ivreg, lmtest, sandwich, fixest, bacondecomp.
   
 ## Data
-The data archive is downloaded automatically by the script from Zenodo: [https://doi.org/10.5281/zenodo.20715643] (https://doi.org/10.5281/zenodo.20715643). It contains the hand-collected provincial women's representation panel (1987–2025), quota adoption and implementation dates, the Granara (2014) cross-validation data, the EPH household microdata (1996–2025), and the Ministry of Labour aggregate data (1990–2003).
+The data archive is downloaded automatically by the script from Zenodo: [https://doi.org/10.5281/zenodo.20715643](https://doi.org/10.5281/zenodo.20715643). It contains the hand-collected provincial women's representation panel (1987–2025), quota adoption and implementation dates, the Granara (2014) cross-validation data, the EPH household microdata (1996–2025), and the Ministry of Labour aggregate data (1990–2003).
 Source: INDEC, [www.indec.gob.ar](https://www.indec.gob.ar)
 
 ## How to run
