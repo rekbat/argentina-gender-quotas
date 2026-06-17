@@ -1,32 +1,99 @@
-  install.packages(c("haven","dplyr","tidyr","ggplot2","readr","stringr",
-                     "purrr","readxl","foreign","did","ivreg","lmtest",
-                     "sandwich","fixest","bacondecomp"))
-
 #packages
-library(haven)
-library(dplyr)
-library(tidyr)
-library(ggplot2)
-library(readr)
-library(stringr)
-library(purrr)
-library(readxl)
-library(foreign)
-library(did)
-library(ivreg)
-library(lmtest)
-library(sandwich)
-library(fixest)
-library(bacondecomp)
+required_packages <- c(
+  "haven", "dplyr", "tidyr", "ggplot2", "readr", "stringr",
+  "purrr", "readxl", "foreign", "did", "ivreg", "lmtest",
+  "sandwich", "fixest", "bacondecomp"
+)
+options(repos = c(CRAN = "https://cloud.r-project.org"))
 
-#download and unzip the data automatically
-if (!dir.exists("quota_data")) {
-  download.file(
-    "https://zenodo.org/records/20715643/files/quota_data.zip?download=1",
-    destfile = "quota_data.zip"
-  )
-  unzip("quota_data.zip")
+#binaries on Windows/macOS, source on Linux.
+package_type <- if (.Platform$OS.type == "windows" ||
+                    Sys.info()[["sysname"]] == "Darwin") {
+  "binary"
+} else {
+  "source"
 }
+
+#dependency packages that may fail to get pulled correctly
+# on older R/macOS binary repositories.
+extra_packages <- c(
+  "Rcpp", "RcppArmadillo", "bigmemory", "BMisc", "DRDID",
+  "fastglm", "dreamerr", "stringmagic"
+)
+all_packages <- unique(c(extra_packages, required_packages))
+install_if_missing_or_unloadable <- function(pkgs) {
+  for (pkg in pkgs) {
+    if (!requireNamespace(pkg, quietly = TRUE)) {
+      message("Installing package: ", pkg)
+      install.packages(
+        pkg,
+        dependencies = c("Depends", "Imports", "LinkingTo"),
+        type = package_type
+      )
+    }
+  }
+}
+#first pass
+install_if_missing_or_unloadable(all_packages)
+#second pass
+install_if_missing_or_unloadable(all_packages)
+#final verification
+failed_packages <- all_packages[
+  !vapply(all_packages, requireNamespace, logical(1), quietly = TRUE)
+]
+if (length(failed_packages) > 0) {
+  stop(
+    "The following packages are still not loadable: ",
+    paste(failed_packages, collapse = ", "),
+    "\n\nThis is not a script-path problem. It is a package installation problem.\n",
+    "On macOS/Windows, try updating R if old CRAN binaries are incompatible.\n",
+    "On Linux, system build tools/libraries may be required."
+  )
+}
+suppressPackageStartupMessages(
+  invisible(lapply(required_packages, library, character.only = TRUE))
+)
+#download and unzip data automatically
+options(timeout = max(1800, getOption("timeout")))  #30 minutes for roughly 379MB
+data_url <- "https://zenodo.org/records/20715643/files/quota_data.zip?download=1"
+zip_file <- "quota_data.zip"
+data_dir <- "quota_data"
+required_data_files <- c(
+  file.path(data_dir, "LowQuota_adopt_impl.xlsx"),
+  file.path(data_dir, "HighQuota_adopt_implement.xlsx"),
+  file.path(data_dir, "women_representation.xlsx"),
+  file.path(data_dir, "Base de datos_WomensRepresentation.xls"),
+  file.path(data_dir, "UnemploymentRate_UrbanAgglomeration_Women_1990-2003.xls"),
+  file.path(data_dir, "EmploymentRate_UrbanAgglomeration_Women_1990-2003.xls"),
+  file.path(data_dir, "female_LFPR_1990-2003.xls"),
+  file.path(data_dir, "female_underemploymentrate_1990-2003.xls"),
+  file.path(data_dir, "female_overemp_1990-2003.xls")
+)
+if (!all(file.exists(required_data_files))) {
+  message("Data folder is missing or incomplete.")
+  if (!file.exists(zip_file)) {
+    message("Downloading quota_data.zip from Zenodo (379 MB, this may take a while).")
+    download.file(url = data_url, destfile = zip_file, mode = "wb", quiet = FALSE)
+  } else {
+    message("Using existing quota_data.zip.")
+  }
+  message("Checking ZIP integrity.")
+  zip_check <- tryCatch(unzip(zip_file, list = TRUE), error = function(e) NULL)
+  if (is.null(zip_check)) {
+    stop("quota_data.zip is corrupt or incomplete. Delete it and run the script again.")
+  }
+  message("Unzipping data.")
+  unzip(zip_file, overwrite = TRUE)
+  if (!all(file.exists(required_data_files))) {
+    message("Files found under quota_data:")
+    print(list.files(data_dir, recursive = TRUE))
+    stop(
+      "Data folder still incomplete after unzip. Missing:\n",
+      paste(required_data_files[!file.exists(required_data_files)], collapse = "\n")
+    )
+  }
+}
+message("Data folder verified.")
 
 #data 
 #quota and representation data
@@ -36,54 +103,54 @@ path_femrep     <- read_excel("quota_data/women_representation.xlsx")
 path_granararaw <- read_excel("quota_data/Base de datos_WomensRepresentation.xls")
                               
 #ministry of labor aggregate data for low quota (1990–2003) 
-path_unem_9003  <- read_excel("quota_data/LaborMarket_Data/UnemploymentRate_UrbanAgglomeration_Women_1990-2003.xls", skip = 2)
-path_emp_9003   <- read_excel("quota_data/LaborMarket_Data/EmploymentRate_UrbanAgglomeration_Women_1990-2003.xls",   skip = 2)
-path_LFP_9003   <- read_excel("quota_data/LaborMarket_Data/female_LFPR_1990-2003.xls",   skip = 2)
-path_underemp_9003 <- read_excel("quota_data/LaborMarket_Data/female_underemploymentrate_1990-2003.xls",   skip = 2)
-path_overemp_9003 <- read_excel("quota_data/LaborMarket_Data/female_overemp_1990-2003.xls",   skip = 2)
-
+path_unem_9003     <- read_excel("quota_data/UnemploymentRate_UrbanAgglomeration_Women_1990-2003.xls", skip = 2)
+path_emp_9003      <- read_excel("quota_data/EmploymentRate_UrbanAgglomeration_Women_1990-2003.xls",   skip = 2)
+path_LFP_9003      <- read_excel("quota_data/female_LFPR_1990-2003.xls",   skip = 2)
+path_underemp_9003 <- read_excel("quota_data/female_underemploymentrate_1990-2003.xls",   skip = 2)
+path_overemp_9003  <- read_excel("quota_data/female_overemp_1990-2003.xls",   skip = 2)
+                        
 #EPH individual-level microdata for high quota (1996–2025)
 #2nd quarter for all years
 #alternative quarters for 2020 and 2024 for data quality issues
 #alternative quarter for 2023 for sensitivity check
-path_EH_1996 <- read.dbf("quota_data/LaborMarket_Data/EH_ind_1996_2.DBF", as.is = TRUE)
-path_EH_1997 <- read.dbf("quota_data/LaborMarket_Data/EH_ind_1997.DBF",     as.is = TRUE)
-path_EH_1998 <- read.dbf("quota_data/LaborMarket_Data/EH_ind_1998_2.DBF",   as.is = TRUE)
-path_EH_1999 <- read.dbf("quota_data/LaborMarket_Data/EH_ind_1999.DBF",     as.is = TRUE)
-path_EH_2000 <- read.dbf("quota_data/LaborMarket_Data/EH_ind_2000.DBF",     as.is = TRUE)
-path_EH_2001 <- read.dbf("quota_data/LaborMarket_Data/EH_ind_2001.DBF",     as.is = TRUE)
-path_EH_2002 <- read.dbf("quota_data/LaborMarket_Data/EH_ind_2002.DBF",     as.is = TRUE)
-path_EH_2003 <- read_dta("quota_data/LaborMarket_Data/EH_ind_2003.dta")
-path_EH_2004 <- read_dta("quota_data/LaborMarket_Data/EH_ind_2004_2.dta")
-path_EH_2005 <- read_dta("quota_data/LaborMarket_Data/EH_ind_2005_2.dta")
-path_EH_2006 <- read_dta("quota_data/LaborMarket_Data/EH_ind_2006_2.dta")
-path_EH_2007 <- read_dta("quota_data/LaborMarket_Data/EH_ind_2007_2.dta")
-path_EH_2008 <- read_dta("quota_data/LaborMarket_Data/EH_ind_2008_2.dta")
-path_EH_2009 <- read_dta("quota_data/LaborMarket_Data/EH_ind_2009_2.dta")
-path_EH_2010 <- read_dta("quota_data/LaborMarket_Data/EH_ind_2010_2.dta")
-path_EH_2011 <- read_dta("quota_data/LaborMarket_Data/EH_ind_2011_2.dta")
-path_EH_2012 <- read_dta("quota_data/LaborMarket_Data/EH_ind_2012_2.dta")
-path_EH_2013 <- read_dta("quota_data/LaborMarket_Data/EH_ind_2013_2.dta")
-path_EH_2014 <- read_dta("quota_data/LaborMarket_Data/EH_ind_2014_2.dta")
-path_EH_2015 <- read_dta("quota_data/LaborMarket_Data/EH_ind_2015_2.dta")
-path_EH_2016 <- read_excel("quota_data/LaborMarket_Data/EH_ind_2016_2.xls")
-path_EH_2017 <- read_excel("quota_data/LaborMarket_Data/EH_ind_2017_2.xls")
-path_EH_2018 <- read_excel("quota_data/LaborMarket_Data/EH_ind_2018_2.xls")
-path_EH_2019 <- read_excel("quota_data/LaborMarket_Data/EH_ind_2019_2.xls")
-path_EH_2020_1 <- read_excel("quota_data/LaborMarket_Data/EH_ind_2020_1.xlsx")
-path_EH_2020 <- read_excel("quota_data/LaborMarket_Data/EH_ind_2020_2.xlsx")
-path_EH_2020_3 <- read_excel("quota_data/LaborMarket_Data/EH_ind_2020_3.xlsx")
-path_EH_2020_4 <- read_excel("quota_data/LaborMarket_Data/EH_ind_2020_4.xlsx")
-path_EH_2021 <- read_excel("quota_data/LaborMarket_Data/EH_ind_2021_2.xlsx")
-path_EH_2022 <- read_excel("quota_data/LaborMarket_Data/EH_ind_2022_2.xlsx")
-path_EH_2023 <- read_excel("quota_data/LaborMarket_Data/EH_ind_2023_2.xlsx")
-path_EH_2023_1 <- read_excel("quota_data/LaborMarket_Data/EH_ind_2023_1.xlsx")
-path_EH_2024 <- read_excel("quota_data/LaborMarket_Data/EH_ind_2024_2.xlsx")
-path_EH_2024_3 <- read_excel("quota_data/LaborMarket_Data/EH_ind_2024_3.xlsx")
-path_EH_2024_1 <- read_excel("quota_data/LaborMarket_Data/EH_ind_2024_1.xlsx")
-path_EH_2024_4 <- read_excel("quota_data/LaborMarket_Data/EH_ind_2024_4.xlsx")
-path_EH_2025 <- read_excel("quota_data/LaborMarket_Data/EH_ind_2025_2.xlsx")
-
+path_EH_1996 <- read.dbf("quota_data/EH_ind_1996_2.DBF", as.is = TRUE)
+path_EH_1997 <- read.dbf("quota_data/EH_ind_1997.DBF",     as.is = TRUE)
+path_EH_1998 <- read.dbf("quota_data/EH_ind_1998_2.DBF",   as.is = TRUE)
+path_EH_1999 <- read.dbf("quota_data/EH_ind_1999.DBF",     as.is = TRUE)
+path_EH_2000 <- read.dbf("quota_data/EH_ind_2000.DBF",     as.is = TRUE)
+path_EH_2001 <- read.dbf("quota_data/EH_ind_2001.DBF",     as.is = TRUE)
+path_EH_2002 <- read.dbf("quota_data/EH_ind_2002.DBF",     as.is = TRUE)
+path_EH_2003 <- read_dta("quota_data/EH_ind_2003.dta")
+path_EH_2004 <- read_dta("quota_data/EH_ind_2004_2.dta")
+path_EH_2005 <- read_dta("quota_data/EH_ind_2005_2.dta")
+path_EH_2006 <- read_dta("quota_data/EH_ind_2006_2.dta")
+path_EH_2007 <- read_dta("quota_data/EH_ind_2007_2.dta")
+path_EH_2008 <- read_dta("quota_data/EH_ind_2008_2.dta")
+path_EH_2009 <- read_dta("quota_data/EH_ind_2009_2.dta")
+path_EH_2010 <- read_dta("quota_data/EH_ind_2010_2.dta")
+path_EH_2011 <- read_dta("quota_data/EH_ind_2011_2.dta")
+path_EH_2012 <- read_dta("quota_data/EH_ind_2012_2.dta")
+path_EH_2013 <- read_dta("quota_data/EH_ind_2013_2.dta")
+path_EH_2014 <- read_dta("quota_data/EH_ind_2014_2.dta")
+path_EH_2015 <- read_dta("quota_data/EH_ind_2015_2.dta")
+path_EH_2016 <- read_excel("quota_data/EH_ind_2016_2.xls")
+path_EH_2017 <- read_excel("quota_data/EH_ind_2017_2.xls")
+path_EH_2018 <- read_excel("quota_data/EH_ind_2018_2.xls")
+path_EH_2019 <- read_excel("quota_data/EH_ind_2019_2.xls")
+path_EH_2020_1 <- read_excel("quota_data/EH_ind_2020_1.xlsx")
+path_EH_2020 <- read_excel("quota_data/EH_ind_2020_2.xlsx")
+path_EH_2020_3 <- read_excel("quota_data/EH_ind_2020_3.xlsx")
+path_EH_2020_4 <- read_excel("quota_data/EH_ind_2020_4.xlsx")
+path_EH_2021 <- read_excel("quota_data/EH_ind_2021_2.xlsx")
+path_EH_2022 <- read_excel("quota_data/EH_ind_2022_2.xlsx")
+path_EH_2023 <- read_excel("quota_data/EH_ind_2023_2.xlsx")
+path_EH_2023_1 <- read_excel("quota_data/EH_ind_2023_1.xlsx")
+path_EH_2024 <- read_excel("quota_data/EH_ind_2024_2.xlsx")
+path_EH_2024_3 <- read_excel("quota_data/EH_ind_2024_3.xlsx")
+path_EH_2024_1 <- read_excel("quota_data/EH_ind_2024_1.xlsx")
+path_EH_2024_4 <- read_excel("quota_data/EH_ind_2024_4.xlsx")
+path_EH_2025 <- read_excel("quota_data/EH_ind_2025_2.xlsx")
+                        
 #eph file lists for all cleaning functions in high quota (early, 1996-2002)
 eph_files_early <- list(
   list(df = path_EH_1996, year = 1996),
