@@ -3260,8 +3260,16 @@ eph_panel_prov_married %>%
     .groups = "drop"
   ) %>%
   print(n = 30)
+eph_panel_prov_married %>%
+  summarise(
+    mean_unemp     = round(mean(unemp_rate_married,     na.rm = TRUE), 2),
+    mean_lfp       = round(mean(lfp_rate_married,       na.rm = TRUE), 2),
+    mean_housewife = round(mean(housewife_rate_married, na.rm = TRUE), 2)
+  ) %>%
+  print()            
 #married women have high housewife rates, low unemployment and high lfp rates across the years
 #housewife rate decreases largely, unemployment rate also decreases while lfp increases over the years
+#average housewife rate across all years is at 35%            
 
 #province-year level summary for single women
 eph_panel_prov_single %>%
