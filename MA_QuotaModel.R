@@ -417,6 +417,37 @@ treatment_panel %>%
 #8 provinces reached the 50% threshold
 #strong increase in women's representation in the provincial parliaments of all provinces 
 
+#average women's representation before any high-quota implementation (excluding CABA)
+pre_high_quota_rep <- treatment_panel %>%
+  filter(
+    !is.na(womens_rep),
+    province != "CABA",
+    year >= 1987,
+    year < 2002           
+  )
+pre_high_quota_rep %>%
+  summarise(
+    n_obs       = n(),
+    n_provinces = n_distinct(province),
+    years       = paste(min(year), max(year), sep = "-"),
+    mean_rep    = mean(womens_rep, na.rm = TRUE),
+    sd_rep      = sd(womens_rep,   na.rm = TRUE),
+    min_rep     = min(womens_rep,  na.rm = TRUE),
+    max_rep     = max(womens_rep,  na.rm = TRUE)
+  ) %>%
+  print()
+#on average across all provinces, women's representation was 15.1%
+
+#snapshot: representation in the last pre-parity year (2001), excluding CABA
+treatment_panel %>%
+  filter(year == 2001, province != "CABA", !is.na(womens_rep)) %>%
+  summarise(
+    mean_rep_2001 = mean(womens_rep, na.rm = TRUE),
+    n             = n()
+  ) %>%
+  print()
+#women's representation in 2001 was 23.7% on average across the provinces                        
+                        
 #low quota pre-treatment data 
 low_quota_pretreatment <- treatment_panel %>%
   group_by(province) %>%
