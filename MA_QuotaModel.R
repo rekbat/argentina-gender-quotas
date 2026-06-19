@@ -2988,6 +2988,17 @@ male_hw_timeseries <- eph_panel_full_hw_male %>%
 print(male_hw_timeseries, n = 40)
 #housewife rate for men remains very low across all years
 
+male_hw_overall_pooled <- eph_panel_full_hw_male %>%
+  filter(!aglomerado %in% c(38, 91)) %>%
+  summarise(
+    housewife_rate_male = sum(pondera[housewife & ch04 == 1], na.rm = TRUE) /
+      sum(pondera[ch04 == 1], na.rm = TRUE) * 100,
+    n_hw_male_raw = sum(housewife & ch04 == 1, na.rm = TRUE),
+    n_male_raw    = sum(ch04 == 1, na.rm = TRUE)
+  )
+print(male_hw_overall_pooled)
+#male housewife rate on average across the years is 1%
+            
 #merge with treatment panel
 second_stage_high_hw_male <- treatment_panel %>%
   filter(year >= 1996) %>%
