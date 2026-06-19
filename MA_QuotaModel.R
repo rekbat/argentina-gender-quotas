@@ -2005,6 +2005,61 @@ twfe_high_overemp_rn1 <- feols(
 summary(twfe_high_overemp_rn1)
 #with the implementation of a high quota, female overemployment rate decreases by 0.77 pp, not statistically significant 
 
+#robustness check: all provinces, truncated at 2023 
+#female unemployment rate
+twfe_high_unemp_rn1_pre24 <- feols(
+  unemp_rate ~ high_quota_implement | province + year,
+  data    = second_stage_high %>% filter(!is.na(unemp_rate), year <= 2023),
+  cluster = ~province
+)
+summary(twfe_high_unemp_rn1_pre24)
+#with the implementation of a high quota, female unemployment rate increases by 1.16 pp, statistically significant at the 10% level
+
+#female employment rate
+twfe_high_emp_rn1_pre24 <- feols(
+  emp_rate ~ high_quota_implement | province + year,
+  data    = second_stage_high %>% filter(!is.na(emp_rate), year <= 2023),
+  cluster = ~province
+)
+summary(twfe_high_emp_rn1_pre24)
+#with the implementation of a high quota, female employment rate increases by 0.90 pp, not statistically significant             
+
+#female lfp rate
+twfe_high_lfp_rn1_pre24 <- feols(
+  lfp_rate ~ high_quota_implement | province + year,
+  data    = second_stage_high %>% filter(!is.na(lfp_rate), year <= 2023),
+  cluster = ~province
+)
+summary(twfe_high_lfp_rn1_pre24)
+#with the implementation of a high quota, female LFP rate increases by 1.52 pp, not statistically significant             
+            
+#housewife rate
+twfe_high_housewife_rn1_pre24 <- feols(
+  housewife_rate ~ high_quota_implement | province + year,
+  data    = second_stage_high %>% filter(!is.na(housewife_rate), year <= 2023),
+  cluster = ~province
+)
+summary(twfe_high_housewife_rn1_pre24)
+#with the implementation of a high quota, female housewife rate decreases by 1.17 pp, statistically significant at the 5% level            
+
+#female underemployment rate
+twfe_high_underemp_rn1_pre24 <- feols(
+  underemp_rate ~ high_quota_implement | province + year,
+  data    = second_stage_high %>% filter(!is.na(underemp_rate), year <= 2023),
+  cluster = ~province
+)
+summary(twfe_high_underemp_rn1_pre24)
+#with the implementation of a high quota, female underemployment rate increases by 1.51 pp, not statistically significant             
+            
+#female overemployment rate
+twfe_high_overemp_rn1_pre24 <- feols(
+  overemp_rate ~ high_quota_implement | province + year,
+  data    = second_stage_high %>% filter(!is.na(overemp_rate), year <= 2023),
+  cluster = ~province
+)
+summary(twfe_high_overemp_rn1_pre24)
+#with the implementation of a high quota, female overemployment rate decreases by 0.85 pp, not statistically significant             
+            
 #robustness check: exclude Rio Negro
 #female unemployment rate
 twfe_high_unemp_rn2 <- feols(
