@@ -2757,37 +2757,6 @@ twfe_high_lfp_male <- feols(
 summary(twfe_high_lfp_male)
 #with the implementation of a high quota, male lfp rate increases by 1.91 pp, statistically significant at the 10% level
 
-#regressions: high quota implementation on overall labour market outcomes (Rio Negro excluded)
-#overall unemployment rate
-twfe_high_unemp_overall_no_rn <- feols(
-  unemp_rate_overall ~ high_quota_implement | province + year,
-  data    = second_stage_high_extended %>%
-    filter(!is.na(unemp_rate_overall), !province %in% c("Rio Negro")),
-  cluster = ~province
-)
-summary(twfe_high_unemp_overall_no_rn)
-#with the implementation of a high quota, overall unemployment rate increases by 0.89 pp, not statistically significant
-
-#overall employment rate 
-twfe_high_emp_overall_no_rn <- feols(
-  emp_rate_overall ~ high_quota_implement | province + year,
-  data    = second_stage_high_extended %>%
-    filter(!is.na(emp_rate_overall), !province %in% c("Rio Negro")),
-  cluster = ~province
-)
-summary(twfe_high_emp_overall_no_rn)
-#with the implementation of a high quota, overall employment rate increases by 0.54 pp, not statistically significant
-
-#overall lfp rate 
-twfe_high_lfp_overall_no_rn <- feols(
-  lfp_rate_overall ~ high_quota_implement | province + year,
-  data    = second_stage_high_extended %>%
-    filter(!is.na(lfp_rate_overall), !province %in% c("Rio Negro")),
-  cluster = ~province
-)
-summary(twfe_high_lfp_overall_no_rn)
-#with the implementation of a high quota, overall lfp rate increases by 1.12 pp, not statistically significant
-
 #regressions: high quota implementation on male labour market outcomes (Rio Negro excluded)
 #male unemployment rate
 twfe_high_unemp_male_no_rn <- feols(
@@ -2819,6 +2788,128 @@ twfe_high_lfp_male_no_rn <- feols(
 summary(twfe_high_lfp_male_no_rn)
 #with the implementation of a high quota, male lfp rate increases by 1.38 pp, not statistically significant
 
+#male housewife rate
+#early panel (1996-2002)
+clean_eph_early_hw_male <- function(df) {
+  df %>%
+    rename_with(tolower) %>%
+    select(-aglomerado) %>%
+    rename(aglomerado = agloreal) %>%
+    mutate(
+      ch04       = as.integer(h13),                       #1=male, 2=female
+      birth_year = as.integer(format(as.Date(h11), "%Y")),
+      ch06       = as.integer(ano4) - birth_year,
+      ano4       = as.integer(ano4),
+      aglomerado = as.integer(aglomerado),
+      pondera    = as.numeric(pondera),
+      estado     = as.integer(estado),
+      housewife  = as.integer(p11) == 4                   
+    ) %>%
+    filter(ch06 >= 14, estado != 0) %>%
+    filter(!is.na(aglomerado), !is.na(pondera)) %>%
+    dplyr::select(ano4, aglomerado, pondera, estado, ch04, housewife)
+}
+
+#late panel (2003-2025)
+clean_eph_hw_male <- function(df, year, quarter = 2) {
+  df %>%
+    mutate(across(where(is.labelled), as.numeric)) %>%
+    rename_with(tolower) %>%
+    filter(ch06 >= 14, estado != 0) %>%
+    mutate(
+      ano4       = as.integer(year),
+      quarter    = quarter,
+      aglomerado = as.integer(aglomerado),
+      pondera    = as.numeric(pondera),
+      estado     = as.integer(estado),
+      ch04       = as.integer(ch04),
+      housewife  = as.integer(cat_inac) == 4              
+    ) %>%
+    filter(!is.na(aglomerado), !is.na(pondera)) %>%
+    dplyr::select(ano4, aglomerado, pondera, estado, ch04, housewife)
+}
+
+#panels
+eph_panel_early_hw_male <- suppressWarnings(
+  bind_rows(lapply(eph_files_early, function(x) clean_eph_early_hw_male(x$df)))
+)
+eph_panel_hw_male <- bind_rows(lapply(eph_files, function(x) {
+  clean_eph_hw_male(x$df, x$year, x$quarter)
+}))
+eph_panel_full_hw_male <- bind_rows(eph_panel_early_hw_male, eph_panel_hw_male)
+
+#aggregate to province-year
+eph_panel_prov_hw_male <- eph_panel_full_hw_male %>%
+  filter(!aglomerado %in% c(38, 91)) %>%
+  left_join(aglo_to_province, by = "aglomerado") %>%
+  filter(!is.na(provincia_cod)) %>%
+  left_join(province_mapping, by = "provincia_cod") %>%
+  filter(!is.na(province)) %>%
+  group_by(province, ano4) %>%
+  summarise(
+    housewife_rate_male = sum(pondera[housewife & ch04 == 1], na.rm = TRUE) /
+      sum(pondera[ch04 == 1], na.rm = TRUE) * 100,
+    n_hw_male_raw = sum(housewife & ch04 == 1, na.rm = TRUE),   #unweighted count
+    n_male_raw    = sum(ch04 == 1, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  rename(year = ano4)
+
+#time series: weighted national male housewife rate 
+male_hw_timeseries <- eph_panel_full_hw_male %>%
+  filter(!aglomerado %in% c(38, 91)) %>%
+  group_by(ano4) %>%
+  summarise(
+    housewife_rate_male = sum(pondera[housewife & ch04 == 1], na.rm = TRUE) /
+      sum(pondera[ch04 == 1], na.rm = TRUE) * 100,
+    n_hw_male_raw = sum(housewife & ch04 == 1, na.rm = TRUE),
+    n_male_raw    = sum(ch04 == 1, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  rename(year = ano4) %>%
+  arrange(year)
+print(male_hw_timeseries, n = 40)
+#housewife rate for men remains very low across all years
+
+#merge with treatment panel
+second_stage_high_hw_male <- treatment_panel %>%
+  filter(year >= 1996) %>%
+  left_join(eph_panel_prov_hw_male, by = c("province", "year")) %>%
+  filter(!is.na(province))
+
+#coverage 
+second_stage_high_hw_male %>%
+  summarise(
+    n                = n(),
+    n_provinces      = n_distinct(province),
+    years            = paste(min(year), max(year), sep = "-"),
+    total_hw_male    = sum(n_hw_male_raw, na.rm = TRUE),
+    cells_with_hw    = sum(n_hw_male_raw > 0, na.rm = TRUE),
+    cells_total      = sum(!is.na(housewife_rate_male))
+  ) %>%
+  print()
+#11 missing observations from Rio Negro
+
+#all provinces
+#regression: high quota implementation on housewife rate for men
+twfe_high_hw_male <- feols(
+  housewife_rate_male ~ high_quota_implement | province + year,
+  data    = second_stage_high_hw_male %>% filter(!is.na(housewife_rate_male)),
+  cluster = ~province
+)
+summary(twfe_high_hw_male)
+#with the implementation of a high quota, men's housewife rate increases by 0.03 pp, not statistically significant
+
+#regression: high quota implementation on housewife rate for men (Rio Negro excluded)
+twfe_high_hw_male_no_rn <- feols(
+  housewife_rate_male ~ high_quota_implement | province + year,
+  data    = second_stage_high_hw_male %>%
+    filter(!is.na(housewife_rate_male), !province %in% c("Rio Negro")),
+  cluster = ~province
+)
+summary(twfe_high_hw_male_no_rn)
+#with the implementation of a high quota, men's housewife rate decreases by 0.002 pp, not statistically significant            
+            
 #marital status analysis
 #early EPH data (1996-2002)
 clean_eph_early_marital <- function(df) {
