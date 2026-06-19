@@ -3273,8 +3273,16 @@ eph_panel_prov_single %>%
     .groups = "drop"
   ) %>%
   print(n = 30)
+eph_panel_prov_single %>%
+  summarise(
+    mean_unemp     = round(mean(unemp_rate_single,     na.rm = TRUE), 2),
+    mean_lfp       = round(mean(lfp_rate_single,       na.rm = TRUE), 2),
+    mean_housewife = round(mean(housewife_rate_single, na.rm = TRUE), 2)
+  ) %>%
+  print()            
 #single women have low housewife rates, high unemployment and low lfp rates across the years
 #housewife rate remains relatively constant, while lfp rate increases and unemployment rate decreases over the years
+#average housewife rate across all years is at 7%            
 
 #merge with treatment panel 
 second_stage_marital <- treatment_panel %>%
