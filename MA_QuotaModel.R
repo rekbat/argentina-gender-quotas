@@ -14,8 +14,7 @@ package_type <- if (.Platform$OS.type == "windows" ||
   "source"
 }
 
-#dependency packages that may fail to get pulled correctly
-# on older R/macOS binary repositories.
+#dependency packages that may fail to get pulled correctly on older R/macOS binary repositories
 extra_packages <- c(
   "Rcpp", "RcppArmadillo", "bigmemory", "BMisc", "DRDID",
   "fastglm", "dreamerr", "stringmagic"
